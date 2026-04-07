@@ -2,16 +2,22 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Установка зависимостей
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Системные зависимости
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Копирование проекта
+COPY requirements.txt .
+
+# Обновляем pip и устанавливаем зависимости
+RUN pip install --upgrade pip
+RUN pip install --default-timeout=1000 --retries=10 -r requirements.txt
+
 COPY . .
 
-# Сборка статики
 RUN python manage.py collectstatic --noinput
 
-# Запуск приложения
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "kittygram_backend.wsgi"]
