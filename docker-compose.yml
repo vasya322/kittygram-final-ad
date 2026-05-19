@@ -1,5 +1,3 @@
-version: '3.8'
-
 volumes:
   pg_data:
   static:
@@ -39,7 +37,7 @@ services:
     container_name: frontend
     volumes:
       - static:/static
-    command: cp -r /app/build/. /static/
+    command: sh -c "npm run build && cp -r /app/build/* /static/"
 
   gateway:
     build: ./nginx/
@@ -52,3 +50,4 @@ services:
     depends_on:
       - backend
       - frontend
+      
